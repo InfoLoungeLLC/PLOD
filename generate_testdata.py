@@ -53,6 +53,7 @@ SARS-CoV-2_Infection_Risk_Ontology_cardinality.owlをパースして
 #!/usr/bin/python
 from owlready2 import *
 from rdflib import Graph, Literal, BNode, RDF, RDFS, Namespace, URIRef
+from rdflib.namespace import XSD
 import time
 import random
 
@@ -90,41 +91,44 @@ for place in places:
     place_samples.append(p)
 # print(place_samples)
 
-# activity_types = list(my_world.sparql("""
-#     %s
-#     SELECT DISTINCT * WHERE {
-#         ?s a owl:Class ;
-#            rdfs:subClassOf+ plod:Activity .
-#     } limit 1000""" % (prefix)))
+activity_types = list(my_world.sparql("""
+    %s
+    SELECT DISTINCT * WHERE {
+        ?s a owl:Class ;
+           rdfs:subClassOf+ plod:Activity .
+    } limit 1000""" % (prefix)))
 
-# activity_samples = []
-# for activity_type in activity_types:
-#     activities = list(my_world.sparql("""
-#         %s
-#         SELECT DISTINCT * WHERE {
-#             ?s a <%s>
-#         } limit 1000""" % (prefix, activity_type[0].iri)))
-#     for activity in activities:
-#         activity_samples.append(dict(name=activity[0].name, iri=activity[0].iri, isDropletReachableActivity=activity_type[0].iri == 'http://plod.info/rdf/DropletReachableActivity'))
+activity_samples = []
+for activity_type in activity_types:
+    activities = list(my_world.sparql("""
+        %s
+        SELECT DISTINCT * WHERE {
+            ?s a <%s>
+        } limit 1000""" % (prefix, activity_type[0].iri)))
+    for activity in activities:
+        activity_samples.append(dict(name=activity[0].name, iri=activity[0].iri,
+                                     isDropletReachableActivity=activity_type[0].iri == 'http://plod.info/rdf/DropletReachableActivity'))
 # print(activity_samples)
 
-# risk_activity_situations = list(my_world.sparql("""
-#     %s
-#     SELECT DISTINCT * WHERE {
-#         ?s a plod:RiskActivitySituation .
-#     } limit 1000""" % (prefix)))
+risk_activity_situations = list(my_world.sparql("""
+    %s
+    SELECT DISTINCT * WHERE {
+        ?s a plod:RiskActivitySituation .
+    } limit 1000""" % (prefix)))
 
-# risk_activity_situations_samples = []
-# for risk_activity_situation in risk_activity_situations:
-#     s = dict(name=risk_activity_situation[0].name, iri=risk_activity_situation[0].iri)
-#     risk_activity_situations_samples.append(dict(name=risk_activity_situation[0].name, iri=risk_activity_situation[0].iri))
-# print(risk_activity_situations_samples)
+risk_activity_situation_samples = []
+for risk_activity_situation in risk_activity_situations:
+    s = dict(name=risk_activity_situation[0].name,
+             iri=risk_activity_situation[0].iri)
+    risk_activity_situation_samples.append(
+        dict(name=risk_activity_situation[0].name, iri=risk_activity_situation[0].iri))
 
 store = Graph()
 schema = Namespace("https://schema.org/")
+time = Namespace("http://www.w3.org/2006/time#")
 
-# Bind a few prefix, namespace pairs for pretty output
 store.bind("schema", schema)
+store.bind("time", time)
 
 g = Graph()
 g.parse("rdf/PLOD_schema.owl", format="xml")
@@ -132,22 +136,82 @@ plod = Namespace("http://plod.info/rdf/")
 store.bind("plod", plod)
 
 for place_sample in place_samples:
-  place_sample_uri = URIRef("http://plod.info/rdf/id/%s" % place_sample['name'])
-  store.add((place_sample_uri, RDF.type, schema.Place))
-  store.add((place_sample_uri, RDFS.label, Literal(place_sample['name'])))
-  store.add((place_sample_uri, RDF.type, URIRef(place_sample['iri'])))
+    place_sample_uri = URIRef(
+        "http://plod.info/rdf/id/place_%s" % place_sample['name'])
+    store.add((place_sample_uri, RDF.type, schema.Place))
+    store.add((place_sample_uri, RDFS.label, Literal(place_sample['name'])))
+    store.add((place_sample_uri, RDF.type, URIRef(place_sample['iri'])))
+
+for activity_sample in activity_samples:
+    activity_sample_uri = URIRef(
+        "http://plod.info/rdf/id/activity_%s" % activity_sample['name'])
+    store.add((activity_sample_uri, RDF.type, schema.Activity))
+    store.add((activity_sample_uri, RDFS.label,
+               Literal(activity_sample['name'])))
+    store.add((activity_sample_uri, RDF.type, URIRef(activity_sample['iri'])))
+
+for risk_activity_situation_sample in risk_activity_situation_samples:
+    risk_activity_situation_sample_uri = URIRef(
+        "http://plod.info/rdf/id/situation_%s" % risk_activity_situation_sample['name'])
+    store.add((risk_activity_situation_sample_uri, RDF.type, plod.Situation))
+    store.add((risk_activity_situation_sample_uri, RDFS.label,
+               Literal(risk_activity_situation_sample['name'])))
+    store.add((risk_activity_situation_sample_uri, RDF.type, URIRef(risk_activity_situation_sample['iri'])))
+
+person_samples = []
+for i in range(10):
+    person_sample_uri = URIRef(
+        "http://plod.info/rdf/id/person_%s" % i)
+    store.add((person_sample_uri, RDF.type, schema.Person))
+    store.add((person_sample_uri, RDFS.label, Literal("person_%s" % i)))
+    person_samples.append(person_sample_uri)
 
 events = []
 for i in range(100):
-  uri = "http://plod.info/rdf/id/event_%s" % i
-  event_uri = URIRef(uri)
-  store.add((event_uri, RDF.type, schema.Event))
-  store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
-  location = random.choice(place_samples)
-  store.set((event_uri, schema.Location, URIRef("http://plod.info/rdf/id/%s" % location['name'])))
-  event = dict(uri=uri, iri=place[0].iri, isHighLevelCloseContact=False)
-  events.append(event)
+    uri = "http://plod.info/rdf/id/event_%s" % i
+    event_uri = URIRef(uri)
+    store.add((event_uri, RDF.type, schema.Event))
+    store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
 
+    location = random.choice(place_samples)
+    store.add((event_uri, schema.Location, URIRef(
+        "http://plod.info/rdf/id/place_%s" % location['name'])))
+
+    action_count = random.randint(3, 6)
+    actions = random.sample(activity_samples, action_count)
+    droplet_reachable_activity_count = 0
+    for action in actions:
+        store.add((event_uri, plod.action, URIRef(
+            "http://plod.info/rdf/id/activity_%s" % action['name'])))
+        if(action["isDropletReachableActivity"]):
+            droplet_reachable_activity_count += 1
+
+    person_count = random.randint(1, 4)
+    persons = random.sample(person_samples, person_count)
+    for person in persons:
+        store.add((event_uri, plod.agent, person))
+
+    risk_activity_situation_count = random.randint(0, 2)
+    risk_activity_situations = random.sample(
+        risk_activity_situation_samples, risk_activity_situation_count)
+    for risk_activity_situation in risk_activity_situations:
+        store.add((event_uri, plod.situationOfActivity, URIRef(
+            "http://plod.info/rdf/id/situation_%s" % risk_activity_situation['name'])))
+
+    time_uri = URIRef("http://plod.info/rdf/id/time_%s" % i)
+    store.add((time_uri, RDF.type, time.Interval))
+    store.add((event_uri, plod.time, time_uri))
+
+    time_temporal_duration_uri = URIRef("http://plod.info/rdf/id/duration_%s" % i)
+    store.add((time_temporal_duration_uri, RDF.type, time.TemporalDuration))
+    store.add((time_uri, time.hasDuration, time_temporal_duration_uri))
+    store.add((time_temporal_duration_uri, time.numericDuration, Literal("3.6E2", datatype=XSD.decimal)))
+
+    event = dict(uri=uri, iri=place[0].iri, locationHasOneMoreThanDropletReachableActivity=location['DropletReachableActivity']
+                 > 1, eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count > 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0)
+    events.append(event)
+
+# print(events)
 # print("--- printing raw triples ---")
 # for s, p, o in store:
 #     print(s, p, o)
