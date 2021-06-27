@@ -50,5 +50,107 @@ SARS-CoV-2_Infection_Risk_Ontology_cardinality.owlをパースして
 - plod:situationOfActivityを任意の数生成。含まれるplod:RiskActivitySituation型の種類が2以上かどうかを判定して内部保持
 - 生成が完了したら、そのschema:Eventがplod:HighLevelCloseContactかどうかを判定。例えば100個テストデータを生成した後、そのうちいくつがplod:HighLevelCloseContactになるはずかをコメント等で出力する
 '''
+#!/usr/bin/python
+from owlready2 import *
+from rdflib import Graph, Literal, BNode, RDF, RDFS, Namespace, URIRef
+import time
+import random
 
+my_world = World()
+my_world.set_backend(filename="./test.sqlite")
+onto = my_world.get_ontology(
+    "rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality.owl").load()
+my_world.save()
 
+prefix = """
+    PREFIX plod: <http://plod.info/rdf/>
+    PREFIX schema: <http://schema.org/>
+"""
+
+places = list(my_world.sparql("""
+    %s
+    SELECT DISTINCT * WHERE {
+        ?s a owl:Class ;
+           rdfs:subClassOf+ schema:Place .
+    } limit 1000""" % (prefix)))
+
+place_samples = []
+for place in places:
+    # print(place[0])
+    affords = list(my_world.sparql("""
+        %s
+        SELECT DISTINCT * WHERE {
+            <%s> rdfs:subClassOf [ owl:onProperty plod:afford ; owl:hasValue ?o2 ] .
+            ?o2 a ?o3
+        } limit 1000""" % (prefix, place[0].iri)))
+    p = dict(name=place[0].name, iri=place[0].iri, DropletReachableActivity=0)
+    for afford in affords:
+        if(hasattr(afford[1], 'iri') and afford[1].iri == 'http://plod.info/rdf/DropletReachableActivity'):
+            p['DropletReachableActivity'] += 1
+    place_samples.append(p)
+# print(place_samples)
+
+# activity_types = list(my_world.sparql("""
+#     %s
+#     SELECT DISTINCT * WHERE {
+#         ?s a owl:Class ;
+#            rdfs:subClassOf+ plod:Activity .
+#     } limit 1000""" % (prefix)))
+
+# activity_samples = []
+# for activity_type in activity_types:
+#     activities = list(my_world.sparql("""
+#         %s
+#         SELECT DISTINCT * WHERE {
+#             ?s a <%s>
+#         } limit 1000""" % (prefix, activity_type[0].iri)))
+#     for activity in activities:
+#         activity_samples.append(dict(name=activity[0].name, iri=activity[0].iri, isDropletReachableActivity=activity_type[0].iri == 'http://plod.info/rdf/DropletReachableActivity'))
+# print(activity_samples)
+
+# risk_activity_situations = list(my_world.sparql("""
+#     %s
+#     SELECT DISTINCT * WHERE {
+#         ?s a plod:RiskActivitySituation .
+#     } limit 1000""" % (prefix)))
+
+# risk_activity_situations_samples = []
+# for risk_activity_situation in risk_activity_situations:
+#     s = dict(name=risk_activity_situation[0].name, iri=risk_activity_situation[0].iri)
+#     risk_activity_situations_samples.append(dict(name=risk_activity_situation[0].name, iri=risk_activity_situation[0].iri))
+# print(risk_activity_situations_samples)
+
+store = Graph()
+schema = Namespace("https://schema.org/")
+
+# Bind a few prefix, namespace pairs for pretty output
+store.bind("schema", schema)
+
+g = Graph()
+g.parse("rdf/PLOD_schema.owl", format="xml")
+plod = Namespace("http://plod.info/rdf/")
+store.bind("plod", plod)
+
+for place_sample in place_samples:
+  place_sample_uri = URIRef("http://plod.info/rdf/id/%s" % place_sample['name'])
+  store.add((place_sample_uri, RDF.type, schema.Place))
+  store.add((place_sample_uri, RDFS.label, Literal(place_sample['name'])))
+  store.add((place_sample_uri, RDF.type, URIRef(place_sample['iri'])))
+
+events = []
+for i in range(100):
+  uri = "http://plod.info/rdf/id/event_%s" % i
+  event_uri = URIRef(uri)
+  store.add((event_uri, RDF.type, schema.Event))
+  store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
+  location = random.choice(place_samples)
+  store.set((event_uri, schema.Location, URIRef("http://plod.info/rdf/id/%s" % location['name'])))
+  event = dict(uri=uri, iri=place[0].iri, isHighLevelCloseContact=False)
+  events.append(event)
+
+# print("--- printing raw triples ---")
+# for s, p, o in store:
+#     print(s, p, o)
+
+# Serialize the store as RDF/XML to the file donna_foaf.rdf.
+store.serialize("test.rdf", format="pretty-xml", max_depth=3)
