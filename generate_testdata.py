@@ -17,8 +17,8 @@ SARS-CoV-2_Infection_Risk_Ontology_cardinality.owlをパースして
 - schema:Placeを継承するクラスを再帰的に抽出してschema:locationの候補を取得
     - それぞれがplod:DropletReachableActivityを2つ以上持つかを判定しておく
 - plod:Activityを継承するクラスを再帰的に抽出してschema:actionの候補を取得
-- plod:RiskActivitySituationを継承するクラスを再帰的に抽出してplod:situationOfActivityの候補を取得
-    - それぞれがplod:RiskActivitySituationを把握
+    - それぞれがplod:DropletReachableActivity型かを判定しておく
+- plod:RiskActivitySituation型のクラスを抽出してplod:situationOfActivityの候補を取得
 
 ### テストデータ生成
 - schema:locationの候補となるクラスのダミーインスタンスを1つずつ生成
