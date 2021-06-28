@@ -33,7 +33,7 @@ SARS-CoV-2_Infection_Risk_Ontology_cardinality.owlをパースして
     </time:hasDuration>
   </time:Interval>
 ```
-の形式で生成し、schema:Eventのplod:timeプロパティで参照。15分以上(900秒以上）かどうかの判定を内部保持
+の形式で生成し、schema:Eventのplod:timeプロパティで参照。15秒以上(900秒以上）かどうかの判定を内部保持
 
 - plod:agentを`<plod:agent rdf:resource="http://plod.info/rdf/id/person_{xxx}"/>`の形式で適当な数生成
 - plod:actionを任意の数生成。含まれるplod:DropletReachableActivity型の種類が2以上かどうかを判定して内部保持
@@ -172,21 +172,21 @@ for i in range(100):
     store.add((time_uri, RDF.type, time.Interval))
     store.add((event_uri, plod.time, time_uri))
 
-    seconds = random.randint(300, 4800)
+    duration = random.randint(0, 30)
     time_temporal_duration_uri = URIRef(
         "http://plod.info/rdf/id/duration_%s" % i)
     store.add((time_temporal_duration_uri, RDF.type, time.TemporalDuration))
     store.add((time_uri, time.hasDuration, time_temporal_duration_uri))
     store.add((time_temporal_duration_uri, time.numericDuration,
-               Literal(seconds, datatype=XSD.decimal)))
+               Literal(duration, datatype=XSD.decimal)))
 
     event = dict(uri=uri, iri=place[0].iri, locationHasOneMoreThanDropletReachableActivity=location['DropletReachableActivity'] > 1
-                 > 1, eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count > 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0, longerThan15Minutes=seconds > 900)
+                 > 1, eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count > 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0, longerThan15=duration > 15)
     events.append(event)
 
 high_level_close_contact_count = 0
 for event in events:
-    if((event["locationHasOneMoreThanDropletReachableActivity"] or event["eventHasOneMoreThanDropletReachableActivity"]) and event["eventHasRiskActivitySituation"] and event["longerThan15Minutes"]):
+    if((event["locationHasOneMoreThanDropletReachableActivity"] or event["eventHasOneMoreThanDropletReachableActivity"]) and event["eventHasRiskActivitySituation"] and event["longerThan15"]):
         print(event["uri"])
         high_level_close_contact_count += 1
 print(high_level_close_contact_count)
