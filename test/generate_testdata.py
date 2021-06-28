@@ -49,7 +49,7 @@ import random
 my_world = World()
 my_world.set_backend(filename="./test.sqlite")
 onto = my_world.get_ontology(
-    "rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality.owl").load()
+    "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality.owl").load()
 my_world.save()
 
 prefix = """
@@ -118,7 +118,7 @@ store.bind("schema", schema)
 store.bind("time", time)
 
 g = Graph()
-g.parse("rdf/PLOD_schema.owl", format="xml")
+g.parse("../rdf/PLOD_schema.owl", format="xml")
 plod = Namespace("http://plod.info/rdf/")
 store.bind("plod", plod)
 
