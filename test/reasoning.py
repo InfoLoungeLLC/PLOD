@@ -4,13 +4,13 @@ import time
 
 start_time = time.time()
 
-# my_world = World(filename="./reasoning.sqlite")
+my_world = World(filename="./reasoning.sqlite")
 my_world = World()
 onto = my_world.get_ontology("../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality.owl").load()
 # data = my_world.get_ontology("../rdf/example/PLOD_r3.rdf").load()
 data = my_world.get_ontology("./test.rdf").load()
 sync_reasoner([onto,data])
-# my_world.save()
+my_world.save()
 
 results = list(my_world.sparql("""
     PREFIX plod: <http://plod.info/rdf/>
@@ -22,6 +22,6 @@ for result in results:
   ids.append(result[0].iri)  
 ids.sort()
 # print(ids)
-print("plod:HighLevelCloseContact count by reasoning.py: %s" % len(ids)-1)
+print("plod:HighLevelCloseContact count by reasoning.py: %s" % (len(ids)-1))
 
 print("--- %s seconds ---" % (time.time() - start_time))
