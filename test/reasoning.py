@@ -21,7 +21,7 @@ ids = []
 for result in results:
   ids.append(result[0].iri)  
 ids.sort()
-print(ids)
-print(len(ids)-1)
+# print(ids)
+print("plod:HighLevelCloseContact count by reasoning.py: %s" % len(ids)-1)
 
 print("--- %s seconds ---" % (time.time() - start_time))

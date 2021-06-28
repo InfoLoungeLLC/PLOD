@@ -45,6 +45,10 @@ from rdflib import Graph, Literal, BNode, RDF, RDFS, Namespace, URIRef
 from rdflib.namespace import XSD
 import time
 import random
+import sys
+
+args = sys.argv
+data_count = int(args[1])
 
 my_world = World()
 my_world.set_backend(filename="./test.sqlite")
@@ -129,7 +133,7 @@ for place_sample in place_samples:
     store.add((place_sample_uri, RDF.type, URIRef(place_sample['iri'])))
 
 person_samples = []
-for i in range(10):
+for i in range(data_count):
     person_sample_uri = URIRef(
         "http://plod.info/rdf/id/person_%s" % i)
     store.add((person_sample_uri, RDF.type, schema.Person))
@@ -137,7 +141,7 @@ for i in range(10):
     person_samples.append(person_sample_uri)
 
 events = []
-for i in range(100):
+for i in range(data_count):
     uri = "http://plod.info/rdf/id/event_%s" % i
     event_uri = URIRef(uri)
     store.add((event_uri, RDF.type, schema.Event))
@@ -187,8 +191,8 @@ for i in range(100):
 high_level_close_contact_count = 0
 for event in events:
     if((event["locationHasOneMoreThanDropletReachableActivity"] or event["eventHasOneMoreThanDropletReachableActivity"]) and event["eventHasRiskActivitySituation"] and event["longerThan15"]):
-        print(event["uri"])
         high_level_close_contact_count += 1
-print(high_level_close_contact_count)
+print("generate %s test data." % data_count)
+print("plod:HighLevelCloseContact count by generate_testdata.py: %s" % high_level_close_contact_count)
 
 store.serialize("test.rdf", format="pretty-xml", max_depth=3)
