@@ -46,9 +46,22 @@ from rdflib.namespace import XSD
 import time
 import random
 import sys
+import csv
 
 args = sys.argv
 data_count = int(args[1])
+
+# read CSV
+with open('sample.csv', encoding='utf-8') as f:
+    reader = csv.reader(f)
+    case_sample = [row for row in reader]
+
+
+case = case_sample[int(args[2])]
+
+first_count = int(data_count * int(case[4]) / 100)
+second_count = int(data_count * int(case[8]) / 100)
+third_count = data_count - first_count - second_count
 
 my_world = World()
 my_world.set_backend(filename="./test.sqlite")
