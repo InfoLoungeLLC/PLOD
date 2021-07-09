@@ -127,6 +127,37 @@ for risk_activity_situation in risk_activity_situations:
     risk_activity_situation_samples.append(
         dict(name=risk_activity_situation[0].name, iri=risk_activity_situation[0].iri))
 
+
+
+
+risk_spaces_situations = list(my_world.sparql("""
+    %s
+    SELECT DISTINCT * WHERE {
+        ?s a plod:RiskSpaceSituation .
+    } limit 1000""" % (prefix)))
+
+risk_spaces_situation_samples = []
+for risk_spaces_situation in risk_spaces_situations:
+    s = dict(name=risk_spaces_situation[0].name,
+             iri=risk_spaces_situation[0].iri)
+    risk_spaces_situation_samples.append(
+        dict(name=risk_spaces_situation[0].name, iri=risk_spaces_situation[0].iri))
+
+
+situation_types = list(my_world.sparql("""
+    %s
+    SELECT DISTINCT * WHERE {
+        {
+            ?s a owl:Class ;
+            rdfs:subClassOf+ plod:IndoorFacility .
+        }
+        UNION
+        {
+            ?s a owl:Class ;
+            rdfs:subClassOf+ plod:Public_transportation .
+        }
+    } limit 1000""" % (prefix)))
+
 store = Graph()
 schema = Namespace("https://schema.org/")
 time = Namespace("http://www.w3.org/2006/time#")
