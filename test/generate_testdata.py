@@ -155,6 +155,19 @@ for i in range(data_count):
 
 events = []
 for i in range(data_count):
+    if i < first_count:
+        close_contact_level = case[1]
+        crowding_level = case[2]
+        closed_space_level = case[3]
+    elif i < first_count + second_count:
+        close_contact_level = case[5]
+        crowding_level = case[6]
+        closed_space_level = case[7]
+    else:
+        close_contact_level = case[9]
+        crowding_level = case[10]
+        closed_space_level = case[11]
+
     uri = "http://plod.info/rdf/id/event_%s" % i
     event_uri = URIRef(uri)
     store.add((event_uri, RDF.type, schema.Event))
