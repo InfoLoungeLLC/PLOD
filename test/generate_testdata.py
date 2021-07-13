@@ -47,6 +47,7 @@ import time
 import random
 import sys
 import csv
+import select
 
 args = sys.argv
 data_count = int(args[1])
@@ -204,12 +205,12 @@ for i in range(data_count):
     store.add((event_uri, RDF.type, schema.Event))
     store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
 
-    location = random.choice(place_samples)
+    
+    location, actions = select.activity(close_contact_level, place_samples, activity_samples)
+
     store.add((event_uri, schema.Location, URIRef(
         "http://plod.info/rdf/id/%s" % location['name'])))
 
-    action_count = random.randint(0, 3)
-    actions = random.sample(activity_samples, action_count)
     droplet_reachable_activity_count = 0
     for action in actions:
         store.add((event_uri, plod.action, URIRef(
@@ -222,9 +223,9 @@ for i in range(data_count):
     for person in persons:
         store.add((event_uri, plod.agent, person))
 
-    risk_activity_situation_count = random.randint(0, 2)
-    risk_activity_situations = random.sample(
-        risk_activity_situation_samples, risk_activity_situation_count)
+
+    risk_activity_situation_count, risk_activity_situations = select.activity_situation(close_contact_level, risk_activity_situation_samples)
+
     for risk_activity_situation in risk_activity_situations:
         store.add((event_uri, plod.situationOfActivity, URIRef(
             "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
@@ -233,7 +234,8 @@ for i in range(data_count):
     store.add((time_uri, RDF.type, time.Interval))
     store.add((event_uri, plod.time, time_uri))
 
-    duration = random.randint(0, 30)
+    duration = select.random_duration(close_contact_level)
+
     time_temporal_duration_uri = URIRef(
         "http://plod.info/rdf/id/duration_%s" % i)
     store.add((time_temporal_duration_uri, RDF.type, time.TemporalDuration))
@@ -241,8 +243,10 @@ for i in range(data_count):
     store.add((time_temporal_duration_uri, time.numericDuration,
                Literal(duration, datatype=XSD.decimal)))
 
-    event = dict(uri=uri, iri=place[0].iri, locationHasOneMoreThanDropletReachableActivity=location['DropletReachableActivity'] > 1
-                 > 1, eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count > 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0, longerThan15=duration > 15)
+    # select.space_situation(crowding_level, risk_spaces_situation_samples)
+
+    event = dict(uri=uri, iri=place[0].iri, locationHasOneMoreThanDropletReachableActivity=location['DropletReachableActivity'] > 1, 
+                eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count > 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0, longerThan15=duration > 15)  
     events.append(event)
 
 high_level_close_contact_count = 0
