@@ -105,6 +105,8 @@ activity_types = list(my_world.sparql("""
     } limit 1000""" % (prefix)))
 
 activity_samples = []
+reachable_activity_samples = []
+not_reachable_activity_samples = []
 for activity_type in activity_types:
     activities = list(my_world.sparql("""
         %s
@@ -112,8 +114,14 @@ for activity_type in activity_types:
             ?s a <%s>
         } limit 1000""" % (prefix, activity_type[0].iri)))
     for activity in activities:
-        activity_samples.append(dict(name=activity[0].name, iri=activity[0].iri,
-                                     isDropletReachableActivity=activity_type[0].iri == 'http://plod.info/rdf/DropletReachableActivity'))
+        sample = dict(name=activity[0].name, iri=activity[0].iri,
+                                     isDropletReachableActivity=activity_type[0].iri == 'http://plod.info/rdf/DropletReachableActivity')
+        activity_samples.append(sample)
+        if sample["isDropletReachableActivity"]:
+            reachable_activity_samples.append(sample)
+        else:
+            not_reachable_activity_samples.append(sample)
+        
 
 risk_activity_situations = list(my_world.sparql("""
     %s
@@ -206,7 +214,7 @@ for i in range(data_count):
     store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
 
     
-    location, actions = select.activity(close_contact_level, place_samples, activity_samples)
+    location, actions = select.activity(close_contact_level, place_samples, reachable_activity_samples, not_reachable_activity_samples)
 
     store.add((event_uri, schema.Location, URIRef(
         "http://plod.info/rdf/id/%s" % location['name'])))
