@@ -52,6 +52,20 @@ import select
 args = sys.argv
 data_count = int(args[1])
 
+'''
+不可能な組み合わせ
+h-h-m
+h-m-m
+h-l-h
+m-h-m
+m-m-m
+m-l-h
+
+
+l-h-m
+l-m-m
+'''
+
 # read CSV
 with open('sample.csv', encoding='utf-8') as f:
     reader = csv.reader(f)
@@ -167,6 +181,21 @@ situation_types = list(my_world.sparql("""
         }
     } limit 1000""" % (prefix)))
 
+# situation_samples = []
+# # print(situation_types)
+# for situation_type in situation_types:
+#     print(situation_type)
+#     situations = list(my_world.sparql("""
+#         %s
+#         SELECT DISTINCT * WHERE {
+#             ?s a <%s>
+#         } limit 1000""" % (prefix, situation_type[0].iri)))
+#     print(situations)
+#     for situation in situations:
+#         situation_samples.append(dict(name=situation[0].name, iri=situation[0].iri,
+#                                      isSituationOf=situation_type[0].iri == 'http://plod.info/rdf/isSituationOf'))
+# # print(situation_samples)
+
 store = Graph()
 schema = Namespace("https://schema.org/")
 time = Namespace("http://www.w3.org/2006/time#")
@@ -194,6 +223,8 @@ for i in range(data_count):
     person_samples.append(person_sample_uri)
 
 events = []
+mid_events = []
+low_events = []
 for i in range(data_count):
     if i < first_count:
         close_contact_level = case[1]
@@ -257,11 +288,31 @@ for i in range(data_count):
                 eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count > 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0, longerThan15=duration > 15)  
     events.append(event)
 
+    mid_event = dict(uri=uri, iri=place[0].iri, locationHasOneMoreThanDropletReachableActivity=location['DropletReachableActivity'] == 1 and droplet_reachable_activity_count <= 1, 
+                eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count == 1 and location['DropletReachableActivity'] <= 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0, longerThan15=duration > 15)  
+    mid_events.append(mid_event)
+
+    low_event = dict(uri=uri, iri=place[0].iri, locationHasOneMoreThanDropletReachableActivity=location['DropletReachableActivity'] == 0, 
+                eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count == 0, eventHasRiskActivitySituation=risk_activity_situation_count == 0, longerThan15=duration <= 15)  
+    low_events.append(low_event)
+
 high_level_close_contact_count = 0
 for event in events:
     if((event["locationHasOneMoreThanDropletReachableActivity"] or event["eventHasOneMoreThanDropletReachableActivity"]) and event["eventHasRiskActivitySituation"] and event["longerThan15"]):
         high_level_close_contact_count += 1
 print("generate %s test data." % data_count)
 print("plod:HighLevelCloseContact count by generate_testdata.py: %s" % high_level_close_contact_count)
+
+high_level_close_contact_count = 0
+for event in mid_events:
+    if((event["locationHasOneMoreThanDropletReachableActivity"] or event["eventHasOneMoreThanDropletReachableActivity"]) and event["eventHasRiskActivitySituation"] and event["longerThan15"]):
+        high_level_close_contact_count += 1
+print("plod:MiddleLevelCloseContact count by generate_testdata.py: %s" % high_level_close_contact_count)
+
+high_level_close_contact_count = 0
+for event in low_events:
+    if((event["locationHasOneMoreThanDropletReachableActivity"] and event["eventHasOneMoreThanDropletReachableActivity"]) and event["eventHasRiskActivitySituation"] and event["longerThan15"]):
+        high_level_close_contact_count += 1
+print("plod:LowLevelCloseContact count by generate_testdata.py: %s" % high_level_close_contact_count)
 
 store.serialize("test.rdf", format="pretty-xml", max_depth=3)
