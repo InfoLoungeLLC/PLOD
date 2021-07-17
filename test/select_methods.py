@@ -1,7 +1,7 @@
 import random
 
-def location_and_action(close_contact_level, place_samples, reachable_activity_samples, not_reachable_activity_samples):
-    if close_contact_level == "HighLevelCloseContact":
+def location_and_action(levels, place_samples, reachable_activity_samples, not_reachable_activity_samples):
+    if levels['close_contact'] == "HighLevelCloseContact":
         # 0の時の条件が上手く検出されない
         use_condition = random.randint(0, 2)
         
@@ -20,7 +20,7 @@ def location_and_action(close_contact_level, place_samples, reachable_activity_s
             filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] > 1, place_samples))
             droplet_reachable_count = random.randint(2, 3)
 
-    elif close_contact_level == "MiddleLevelCloseContact":
+    elif levels['close_contact'] == "MiddleLevelCloseContact":
         # 0の時の条件が上手く検出されない
         use_condition = random.randint(0, 2)
         
@@ -53,8 +53,8 @@ def location_and_action(close_contact_level, place_samples, reachable_activity_s
     return location, actions
 
 
-def activity_situation(close_contact_level, risk_activity_situation_samples):
-    if close_contact_level == "HighLevelCloseContact" or close_contact_level == "MiddleLevelCloseContact":
+def activity_situation(levels, risk_activity_situation_samples):
+    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MiddleLevelCloseContact":
         risk_activity_situation_count = random.randint(1, 2)
 
     else:
@@ -63,8 +63,8 @@ def activity_situation(close_contact_level, risk_activity_situation_samples):
     risk_activity_situations = random.sample(risk_activity_situation_samples, risk_activity_situation_count)
     return risk_activity_situation_count, risk_activity_situations
 
-def random_duration(close_contact_level):
-    if close_contact_level == "HighLevelCloseContact" or close_contact_level == "MiddleLevelCloseContact" :
+def random_duration(levels):
+    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MiddleLevelCloseContact" :
         return random.randint(16, 30)
     else:
         return random.randint(0, 15)

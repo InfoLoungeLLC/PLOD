@@ -257,20 +257,27 @@ high_events = []
 mid_events = []
 low_events = []
 for i in range(data_count):
+    levels = {}
     if i < first_count:
-        close_contact_level = case[1]
-        crowding_level = case[2]
-        closed_space_level = case[3]
+        levels.update(
+            close_contact=case[1],
+            crowding=case[2],
+            closed_space=case[3]
+        )
     elif i < first_count + second_count:
-        close_contact_level = case[5]
-        crowding_level = case[6]
-        closed_space_level = case[7]
+        levels.update(
+            close_contact=case[5],
+            crowding=case[6],
+            closed_space=case[7]
+        )
     else:
-        close_contact_level = case[9]
-        crowding_level = case[10]
-        closed_space_level = case[11]
+        levels.update(
+            close_contact=case[9],
+            crowding=case[10],
+            closed_space=case[11]
+        )
 
-    # print(close_contact_level, crowding_level, closed_space_level)
+    # print(close_contact, crowding, closed_space)
 
     uri = "http://plod.info/rdf/id/event_%s" % i
     event_uri = URIRef(uri)
@@ -278,7 +285,7 @@ for i in range(data_count):
     store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
 
     location, actions = sl.location_and_action(
-        close_contact_level, place_samples, reachable_activity_samples, not_reachable_activity_samples)
+        levels, place_samples, reachable_activity_samples, not_reachable_activity_samples)
 
     store.add((event_uri, schema.Location, URIRef(
         "http://plod.info/rdf/id/%s" % location['name'])))
@@ -296,7 +303,7 @@ for i in range(data_count):
         store.add((event_uri, plod.agent, person))
 
     risk_activity_situation_count, risk_activity_situations = sl.activity_situation(
-        close_contact_level, risk_activity_situation_samples)
+        levels, risk_activity_situation_samples)
 
     for risk_activity_situation in risk_activity_situations:
         store.add((event_uri, plod.situationOfActivity, URIRef(
@@ -306,7 +313,7 @@ for i in range(data_count):
     store.add((time_uri, RDF.type, time.Interval))
     store.add((event_uri, plod.time, time_uri))
 
-    duration = sl.random_duration(close_contact_level)
+    duration = sl.random_duration(levels)
 
     time_temporal_duration_uri = URIRef(
         "http://plod.info/rdf/id/duration_%s" % i)
@@ -315,7 +322,7 @@ for i in range(data_count):
     store.add((time_temporal_duration_uri, time.numericDuration,
                Literal(duration, datatype=XSD.decimal)))
 
-    # sl.space_situation(crowding_level, risk_spaces_situation_samples)
+    # sl.space_situation(crowding, risk_spaces_situation_samples)
 
     high_event = {'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] > 1,
                   'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count > 1, 'event_has_one_risk_activity_situation': risk_activity_situation_count > 0, 'longer_than_15': duration > 15}
