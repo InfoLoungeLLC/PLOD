@@ -47,7 +47,7 @@ import time
 import random
 import sys
 import csv
-import select
+import select_methods as sl
 
 args = sys.argv
 data_count = int(args[1])
@@ -70,7 +70,6 @@ l-m-m
 with open('sample.csv', encoding='utf-8') as f:
     reader = csv.reader(f)
     case_sample = [row for row in reader]
-
 
 case = case_sample[int(args[2])]
 
@@ -135,7 +134,7 @@ for activity_type in activity_types:
             reachable_activity_samples.append(sample)
         else:
             not_reachable_activity_samples.append(sample)
-        
+
 
 risk_activity_situations = list(my_world.sparql("""
     %s
@@ -145,12 +144,8 @@ risk_activity_situations = list(my_world.sparql("""
 
 risk_activity_situation_samples = []
 for risk_activity_situation in risk_activity_situations:
-    s = dict(name=risk_activity_situation[0].name,
-             iri=risk_activity_situation[0].iri)
     risk_activity_situation_samples.append(
         dict(name=risk_activity_situation[0].name, iri=risk_activity_situation[0].iri))
-
-
 
 
 risk_spaces_situations = list(my_world.sparql("""
@@ -161,8 +156,6 @@ risk_spaces_situations = list(my_world.sparql("""
 
 risk_spaces_situation_samples = []
 for risk_spaces_situation in risk_spaces_situations:
-    s = dict(name=risk_spaces_situation[0].name,
-             iri=risk_spaces_situation[0].iri)
     risk_spaces_situation_samples.append(
         dict(name=risk_spaces_situation[0].name, iri=risk_spaces_situation[0].iri))
 
@@ -245,7 +238,7 @@ for i in range(data_count):
     store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
 
     
-    location, actions = select.activity(close_contact_level, place_samples, reachable_activity_samples, not_reachable_activity_samples)
+    location, actions = sl.activity(close_contact_level, place_samples, reachable_activity_samples, not_reachable_activity_samples)
 
     store.add((event_uri, schema.Location, URIRef(
         "http://plod.info/rdf/id/%s" % location['name'])))
@@ -263,7 +256,7 @@ for i in range(data_count):
         store.add((event_uri, plod.agent, person))
 
 
-    risk_activity_situation_count, risk_activity_situations = select.activity_situation(close_contact_level, risk_activity_situation_samples)
+    risk_activity_situation_count, risk_activity_situations = sl.activity_situation(close_contact_level, risk_activity_situation_samples)
 
     for risk_activity_situation in risk_activity_situations:
         store.add((event_uri, plod.situationOfActivity, URIRef(
@@ -273,7 +266,7 @@ for i in range(data_count):
     store.add((time_uri, RDF.type, time.Interval))
     store.add((event_uri, plod.time, time_uri))
 
-    duration = select.random_duration(close_contact_level)
+    duration = sl.random_duration(close_contact_level)
 
     time_temporal_duration_uri = URIRef(
         "http://plod.info/rdf/id/duration_%s" % i)
@@ -282,7 +275,7 @@ for i in range(data_count):
     store.add((time_temporal_duration_uri, time.numericDuration,
                Literal(duration, datatype=XSD.decimal)))
 
-    # select.space_situation(crowding_level, risk_spaces_situation_samples)
+    # sl.space_situation(crowding_level, risk_spaces_situation_samples)
 
     event = dict(uri=uri, iri=place[0].iri, locationHasOneMoreThanDropletReachableActivity=location['DropletReachableActivity'] > 1, 
                 eventHasOneMoreThanDropletReachableActivity=droplet_reachable_activity_count > 1, eventHasRiskActivitySituation=risk_activity_situation_count > 0, longerThan15=duration > 15)  
