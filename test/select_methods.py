@@ -1,23 +1,23 @@
 import random
 
-def activity(close_contact_level, place_samples, reachable_activity_samples, not_reachable_activity_samples):
+def location_and_action(close_contact_level, place_samples, reachable_activity_samples, not_reachable_activity_samples):
     if close_contact_level == "HighLevelCloseContact":
         # 0の時の条件が上手く検出されない
         use_condition = random.randint(0, 2)
         
         if use_condition == 0:
             # 1の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['DropletReachableActivity'] > 1, place_samples))
+            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] > 1, place_samples))
             droplet_reachable_count = random.randint(0, 1)
 
         elif use_condition == 1:
             # 2の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['DropletReachableActivity'] < 2, place_samples))
+            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] < 2, place_samples))
             droplet_reachable_count = random.randint(2, 3)
 
         else:
             # 両方の条件を満たす
-            filter_samples = list(filter(lambda place: place['DropletReachableActivity'] > 1, place_samples))
+            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] > 1, place_samples))
             droplet_reachable_count = random.randint(2, 3)
 
     elif close_contact_level == "MiddleLevelCloseContact":
@@ -26,22 +26,22 @@ def activity(close_contact_level, place_samples, reachable_activity_samples, not
         
         if use_condition == 0:
             # 1の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['DropletReachableActivity'] == 1, place_samples))
+            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 1, place_samples))
             droplet_reachable_count = 0
 
         elif use_condition == 1:
             # 2の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['DropletReachableActivity'] == 0, place_samples))
+            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 0, place_samples))
             droplet_reachable_count = 1
 
         else:
             # 両方の条件を満たす
-            filter_samples = list(filter(lambda place: place['DropletReachableActivity'] == 1, place_samples))
+            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 1, place_samples))
             droplet_reachable_count = 1
 
     else:
         # LowLevelCloseContactのとき
-        filter_samples = list(filter(lambda place: place['DropletReachableActivity'] == 0, place_samples))      
+        filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 0, place_samples))
         droplet_reachable_count = 0
 
     
