@@ -246,37 +246,36 @@ for place_sample in samples['place']:
     store.add((place_sample_uri, RDFS.label, Literal(place_sample['name'])))
     store.add((place_sample_uri, RDF.type, URIRef(place_sample['iri'])))
 
-samples['person'] = []
-for i in range(data_count):
-    person_sample_uri = URIRef(
-        "http://plod.info/rdf/id/person_%s" % i)
-    store.add((person_sample_uri, RDF.type, schema.Person))
-    store.add((person_sample_uri, RDFS.label, Literal("person_%s" % i)))
-    samples['person'].append(person_sample_uri)
+# samples['person'] = []
+# for i in range(data_count):
+#     person_sample_uri = URIRef(
+#         "http://plod.info/rdf/id/person_%s" % i)
+#     store.add((person_sample_uri, RDF.type, schema.Person))
+#     store.add((person_sample_uri, RDFS.label, Literal("person_%s" % i)))
+#     samples['person'].append(person_sample_uri)
 
-high_events = []
-mid_events = []
-low_events = []
+# high_events = []
+# mid_events = []
+# low_events = []
 for i in range(data_count):
-    levels = {}
     if i < first_count:
-        levels.update(
-            close_contact=case[1],
-            crowding=case[2],
-            closed_space=case[3]
-        )
+        levels = {
+            'close_contact': case[1],
+            'crowding': case[2],
+            'closed_space': case[3]
+        }
     elif i < first_count + second_count:
-        levels.update(
-            close_contact=case[5],
-            crowding=case[6],
-            closed_space=case[7]
-        )
+        levels = {
+            'close_contact': case[5],
+            'crowding': case[6],
+            'closed_space': case[7]
+        }
     else:
-        levels.update(
-            close_contact=case[9],
-            crowding=case[10],
-            closed_space=case[11]
-        )
+        levels = {
+            'close_contact': case[9],
+            'crowding': case[10],
+            'closed_space': case[11]
+        }
 
     uri = "http://plod.info/rdf/id/event_%s" % i
     event_uri = URIRef(uri)
@@ -296,10 +295,10 @@ for i in range(data_count):
         if(action["is_droplet_reachable_activity"]):
             droplet_reachable_activity_count += 1
 
-    person_count = random.randint(1, 4)
-    persons = random.sample(samples['person'], person_count)
-    for person in persons:
-        store.add((event_uri, plod.agent, person))
+    # person_count = random.randint(1, 4)
+    # persons = random.sample(samples['person'], person_count)
+    # for person in persons:
+    #     store.add((event_uri, plod.agent, person))
 
     risk_activity_situation_count, risk_activity_situations = sl.activity_situation(
         levels, samples['risk_activity_situation'])
@@ -323,36 +322,36 @@ for i in range(data_count):
 
     # sl.space_situation(crowding, samples['risk_space_situation'])
 
-    high_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] > 1,
-                        'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count > 1, 'event_has_one_risk_activity_situation': risk_activity_situation_count > 0, 'longer_than_15': duration > 15})
+    # high_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] > 1,
+    #                     'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count > 1, 'event_has_one_risk_activity_situation': risk_activity_situation_count > 0, 'longer_than_15': duration > 15})
 
-    mid_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] == 1 and droplet_reachable_activity_count <= 1,
-                       'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count == 1 and location['droplet_reachable_activity'] <= 1, 'event_has_one_risk_activity_situation': risk_activity_situation_count > 0, 'longer_than_15': duration > 15})
+    # mid_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] == 1 and droplet_reachable_activity_count <= 1,
+    #                    'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count == 1 and location['droplet_reachable_activity'] <= 1, 'event_has_one_risk_activity_situation': risk_activity_situation_count > 0, 'longer_than_15': duration > 15})
 
-    low_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] == 0,
-                       'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count == 0, 'event_has_one_risk_activity_situation': risk_activity_situation_count == 0, 'longer_than_15': duration <= 15})
+    # low_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] == 0,
+    #                    'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count == 0, 'event_has_one_risk_activity_situation': risk_activity_situation_count == 0, 'longer_than_15': duration <= 15})
 
 print("generate %s test data." % data_count)
 
-high_level_close_contact_count = 0
-for event in high_events:
-    if((event["location_has_one_more_than_droplet_reachable_activity"] or event["event_has_one_more_than_droplet_reachable_activity"]) and event["event_has_one_risk_activity_situation"] and event["longer_than_15"]):
-        high_level_close_contact_count += 1
-print("plod:HighLevelCloseContact count by generate_testdata.py: %s" %
-      high_level_close_contact_count)
+# high_level_close_contact_count = 0
+# for event in high_events:
+#     if((event["location_has_one_more_than_droplet_reachable_activity"] or event["event_has_one_more_than_droplet_reachable_activity"]) and event["event_has_one_risk_activity_situation"] and event["longer_than_15"]):
+#         high_level_close_contact_count += 1
+# print("plod:HighLevelCloseContact count by generate_testdata.py: %s" %
+#       high_level_close_contact_count)
 
-high_level_close_contact_count = 0
-for event in mid_events:
-    if((event["location_has_one_more_than_droplet_reachable_activity"] or event["event_has_one_more_than_droplet_reachable_activity"]) and event["event_has_one_risk_activity_situation"] and event["longer_than_15"]):
-        high_level_close_contact_count += 1
-print("plod:MiddleLevelCloseContact count by generate_testdata.py: %s" %
-      high_level_close_contact_count)
+# high_level_close_contact_count = 0
+# for event in mid_events:
+#     if((event["location_has_one_more_than_droplet_reachable_activity"] or event["event_has_one_more_than_droplet_reachable_activity"]) and event["event_has_one_risk_activity_situation"] and event["longer_than_15"]):
+#         high_level_close_contact_count += 1
+# print("plod:MediumLevelCloseContact count by generate_testdata.py: %s" %
+#       high_level_close_contact_count)
 
-high_level_close_contact_count = 0
-for event in low_events:
-    if((event["location_has_one_more_than_droplet_reachable_activity"] and event["event_has_one_more_than_droplet_reachable_activity"]) and event["event_has_one_risk_activity_situation"] and event["longer_than_15"]):
-        high_level_close_contact_count += 1
-print("plod:LowLevelCloseContact count by generate_testdata.py: %s" %
-      high_level_close_contact_count)
+# high_level_close_contact_count = 0
+# for event in low_events:
+#     if((event["location_has_one_more_than_droplet_reachable_activity"] and event["event_has_one_more_than_droplet_reachable_activity"]) and event["event_has_one_risk_activity_situation"] and event["longer_than_15"]):
+#         high_level_close_contact_count += 1
+# print("plod:LowLevelCloseContact count by generate_testdata.py: %s" %
+#       high_level_close_contact_count)
 
 store.serialize("test.rdf", format="pretty-xml", max_depth=3)

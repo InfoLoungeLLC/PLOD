@@ -1,6 +1,7 @@
 import random
 
 def location_and_action(levels, place_samples, reachable_activity_samples, not_reachable_activity_samples):
+    # print(levels['close_contact'])
     if levels['close_contact'] == "HighLevelCloseContact":
         # 0の時の条件が上手く検出されない
         use_condition = random.randint(0, 2)
@@ -20,9 +21,10 @@ def location_and_action(levels, place_samples, reachable_activity_samples, not_r
             filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] > 1, place_samples))
             droplet_reachable_count = random.randint(2, 3)
 
-    elif levels['close_contact'] == "MiddleLevelCloseContact":
+    elif levels['close_contact'] == "MediumLevelCloseContact":
         # 0の時の条件が上手く検出されない
         use_condition = random.randint(0, 2)
+        # print(use_condition)
         
         if use_condition == 0:
             # 1の条件のみを満たす
@@ -54,9 +56,8 @@ def location_and_action(levels, place_samples, reachable_activity_samples, not_r
 
 
 def activity_situation(levels, risk_activity_situation_samples):
-    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MiddleLevelCloseContact":
+    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MediumLevelCloseContact":
         risk_activity_situation_count = random.randint(1, 2)
-
     else:
         risk_activity_situation_count = 0
 
@@ -64,7 +65,7 @@ def activity_situation(levels, risk_activity_situation_samples):
     return risk_activity_situation_count, risk_activity_situations
 
 def random_duration(levels):
-    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MiddleLevelCloseContact" :
+    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MediumLevelCloseContact" :
         return random.randint(16, 30)
     else:
         return random.randint(0, 15)
@@ -74,7 +75,7 @@ def space_situation(crowding_level, risk_spaces_situation_samples):
         # 中身が2種類しかないのでそのまま返す
         return risk_spaces_situation_samples
 
-    elif crowding_level == "MiddleLevelClosedSpace":
+    elif crowding_level == "MediumLevelClosedSpace":
         risk_spaces_situations = random.choice(risk_spaces_situation_samples)
         return risk_spaces_situations
 

@@ -24,4 +24,16 @@ ids.sort()
 # print(ids)
 print("plod:HighLevelCloseContact count by reasoning.py: %s" % (len(ids)-1))
 
+results = list(my_world.sparql("""
+    PREFIX plod: <http://plod.info/rdf/>
+    SELECT DISTINCT * WHERE {
+        ?s rdf:type plod:MediumLevelCloseContact .
+    } limit 1000"""))
+ids = []
+for result in results:
+  ids.append(result[0].iri)  
+ids.sort()
+# print(ids)
+print("plod:MediumLevelCloseContact count by reasoning.py: %s" % len(ids))
+
 print("--- %s seconds ---" % (time.time() - start_time))
