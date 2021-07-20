@@ -56,7 +56,7 @@ def location_and_action(levels, place_samples, reachable_activity_samples, not_r
 
 
 def activity_situation(levels, risk_activity_situation_samples):
-    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MediumLevelCloseContact":
+    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MediumLevelCloseContact" or levels['crowding'] == "HighLevelCrowding" or levels['crowding'] == "MediumLevelCrowding":
         risk_activity_situation_count = random.randint(1, 2)
     else:
         risk_activity_situation_count = 0
@@ -70,12 +70,22 @@ def random_duration(levels):
     else:
         return random.randint(0, 15)
 
-def space_situation(crowding_level, risk_spaces_situation_samples):
-    if crowding_level == "HighLevelClosedSpace":
+def space_situation(levels, risk_spaces_situation_samples):
+    if levels['crowding'] == "HighLevelCrowding":
         # 中身が2種類しかないのでそのまま返す
         return risk_spaces_situation_samples
 
-    elif crowding_level == "MediumLevelClosedSpace":
+    elif levels['crowding'] == "MediumLevelCrowding":
         risk_spaces_situations = random.choice(risk_spaces_situation_samples)
-        return risk_spaces_situations
+        return [risk_spaces_situations]
 
+    elif levels['closed_space'] == "HighLevelClosedSpace":
+        risk_spaces_situations = random.choice(risk_spaces_situation_samples)
+        return [risk_spaces_situations]
+
+def situation_type(levels, situation_samples):
+    if levels['closed_space'] == "HighLevelClosedSpace" or levels['closed_space'] == "MediumLevelClosedSpace":
+        situations = random.choice(situation_samples)
+        return situations
+
+        
