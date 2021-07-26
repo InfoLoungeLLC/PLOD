@@ -239,7 +239,7 @@ store.bind("plod", plod)
 
 for place_sample in samples['place']:
     place_sample_uri = URIRef(
-        "http://plod.info/rdf/id/%s" % place_sample['name'])
+        "http://plod.info/rdf/%s" % place_sample['name'])
     store.add((place_sample_uri, RDFS.label, Literal(place_sample['name'])))
     store.add((place_sample_uri, RDF.type, URIRef(place_sample['iri'])))
 
@@ -288,8 +288,8 @@ for i in range(data_count):
     location, actions = sl.location_and_action(
         levels, samples['place'], samples['reachable_activity'], samples['not_reachable_activity'])
 
-    store.add((event_uri, schema.Location, URIRef(
-        "http://plod.info/rdf/id/%s" % location['name'])))
+    store.add((event_uri, schema.location, URIRef(
+        "http://plod.info/rdf/%s" % location['name'])))
 
     droplet_reachable_activity_count = 0
     for action in actions:
