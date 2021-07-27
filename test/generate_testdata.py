@@ -288,8 +288,12 @@ for i in range(data_count):
     location, actions = sl.location_and_action(
         levels, samples['place'], samples['reachable_activity'], samples['not_reachable_activity'])
 
-    store.add((event_uri, schema.location, URIRef(
-        "http://plod.info/rdf/%s" % location['name'])))
+    location_uri = URIRef("http://plod.info/rdf/%s_%s" % (location['name'], i))
+    location_uri_noindex = URIRef("http://plod.info/rdf/%s" % location['name'])
+    store.add((event_uri, schema.location, location_uri))
+    store.add((location_uri, RDF.type, location_uri))
+    store.add((location_uri, RDF.type, location_uri_noindex))
+
 
     droplet_reachable_activity_count = 0
     for action in actions:
@@ -323,20 +327,19 @@ for i in range(data_count):
     store.add((time_temporal_duration_uri, time.numericDuration,
                Literal(duration, datatype=XSD.decimal)))
 
+
+    situation_uri = URIRef("http://plod.info/rdf/id/situation_%s" % i)
+    store.add((situation_uri, RDF.type, plod.Situation))
+    store.add((situation_uri, plod.isSituationOf, location_uri))
+
+
     risk_spaces = sl.space_situation(levels, samples['risk_space_situation'])
     risk_spaces_count = 0
     if risk_spaces != None:
         for risk_space in risk_spaces:
             risk_spaces_count += 1
-            store.add((event_uri, plod.situationOfSpace, URIRef(
+            store.add((situation_uri, plod.situationOfSpace, URIRef(
                 "http://plod.info/rdf/%s" % risk_space['name'])))
-
-    situation_types = sl.situation_type(levels, samples['situation_type'])
-    if situation_types != None:
-        store.add((event_uri, plod.isSituationOf, URIRef(
-                "http://plod.info/rdf/%s" % situation_types['name'])))
-
-
 
 
     # high_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] > 1,
