@@ -115,7 +115,7 @@ third_count = data_count - first_count - second_count
 my_world = World()
 my_world.set_backend(filename="./test.sqlite")
 onto = my_world.get_ontology(
-    "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality.owl").load()
+    "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
 my_world.save()
 
 prefix = """
