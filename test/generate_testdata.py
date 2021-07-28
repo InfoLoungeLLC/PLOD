@@ -307,12 +307,6 @@ for i in range(data_count):
     # for person in persons:
     #     store.add((event_uri, plod.agent, person))
 
-    risk_activity_situation_count, risk_activity_situations = sl.activity_situation(
-        levels, samples['risk_activity_situation'])
-
-    for risk_activity_situation in risk_activity_situations:
-        store.add((event_uri, plod.situationOfActivity, URIRef(
-            "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
 
     time_uri = URIRef("http://plod.info/rdf/id/time_%s" % i)
     store.add((time_uri, RDF.type, time.Interval))
@@ -331,6 +325,15 @@ for i in range(data_count):
     situation_uri = URIRef("http://plod.info/rdf/id/situation_%s" % i)
     store.add((situation_uri, RDF.type, plod.Situation))
     store.add((situation_uri, plod.isSituationOf, location_uri))
+
+    risk_activity_situation_count, risk_activity_situations = sl.activity_situation(
+        levels, samples['risk_activity_situation'])
+
+    for risk_activity_situation in risk_activity_situations:
+        store.add((event_uri, plod.situationOfActivity, URIRef(
+            "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
+        store.add((situation_uri, plod.situationOfActivity, URIRef(
+            "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
 
 
     risk_spaces = sl.space_situation(levels, samples['risk_space_situation'])
