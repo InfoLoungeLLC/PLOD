@@ -364,19 +364,18 @@ def generate_testdata(data_count=100, case_number=1):
     print("plod:MediumLevelCrowding count by generate_testdata.py: %s" %
           medium_level_crowding_count)
 
-    store.serialize("test.rdf", format="pretty-xml", max_depth=3)
+    store.serialize("""rdf/test_%s_%s.rdf""" % (case_number, data_count), format="pretty-xml", max_depth=3)
 
     return [high_level_close_contact_count, high_level_closed_space_count, high_level_crowding_count, medium_level_crowding_count, medium_level_closed_space_count, medium_level_crowding_count]
 
-
-def reasoning():
+def reasoning(data_count=100, case_number=1):
     start_time = time.time()
 
     my_world = World(filename="./reasoning.sqlite")
     my_world = World()
     onto = my_world.get_ontology(
         "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
-    data = my_world.get_ontology("./test.rdf").load()
+    data = my_world.get_ontology("""rdf/test_%s_%s.rdf""" % (case_number, data_count)).load()
     sync_reasoner([onto, data])
     my_world.save()
 
