@@ -5,13 +5,13 @@ echo "writing to memory.csv"
 echo "TIME_STAMP,Java Memory Usage (MB)" | tee -a memory.csv
 total="$(free -m | grep Mem | tr -s ' ' | cut -d ' ' -f 2)"
 echo $total
-
+sleep 1
 
 while true
 do
     DATE=`date +"%H:%M:%S:%s%:z"`
     echo -n "$DATE, " | tee -a memory.csv   
-    var="$(top -b -n 1| grep -w java | tr -s ' ' | cut -d ' ' -f 11) "
+    var="$(top -b -n 1| grep -w java | tr -s ' ' | cut -d ' ' -f 11)"
     monitor=`top -b -n 1| grep -w java | tr -s ' ' | cut -d ' ' -f 11`
     echo $monitor
     if [[ `echo "$monitor > 0" | bc` == 1 ]]; then
@@ -19,5 +19,5 @@ do
     else
         break
     fi
-    sleep 1
+    sleep 5
 done
