@@ -78,7 +78,7 @@ SARS-CoV-2_Infection_Risk_Ontology_cardinality.owlをパースして
 2. plot:isSituationOfが存在し、plot:Public_transportationである
 '''
 import sys
-import select_methods as sl
+import functions as fc
 
 '''
 不可能な組み合わせ(csv順)
@@ -95,5 +95,5 @@ l-m-m
 args = sys.argv
 data_count = int(args[1]) if args[1:1] else 100
 case_number = int(args[2]) if args[1:2] else 1
-sl.generate_testdata(data_count, case_number)
-sl.reasoning()
+fc.generate_testdata(data_count, case_number)
+fc.reasoning()
