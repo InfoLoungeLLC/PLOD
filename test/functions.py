@@ -5,55 +5,65 @@ import random
 import time
 import csv
 
+
 def select_location_and_actions(levels, samples):
     if levels['close_contact'] == "HighLevelCloseContact":
         # 0の時の条件が上手く検出されない
         use_condition = random.randint(0, 2)
-        
+
         if use_condition == 0:
             # 1の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] > 1, samples['place']))
+            filter_samples = list(
+                filter(lambda place: place['droplet_reachable_activity'] > 1, samples['place']))
             droplet_reachable_count = random.randint(0, 1)
 
         elif use_condition == 1:
             # 2の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] < 2, samples['place']))
+            filter_samples = list(
+                filter(lambda place: place['droplet_reachable_activity'] < 2, samples['place']))
             droplet_reachable_count = random.randint(2, 3)
 
         else:
             # 両方の条件を満たす
-            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] > 1, samples['place']))
+            filter_samples = list(
+                filter(lambda place: place['droplet_reachable_activity'] > 1, samples['place']))
             droplet_reachable_count = random.randint(2, 3)
 
     elif levels['close_contact'] == "MediumLevelCloseContact":
         # 0の時の条件が上手く検出されない
         use_condition = random.randint(0, 2)
-        
+
         if use_condition == 0:
             # 1の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 1, samples['place']))
+            filter_samples = list(filter(
+                lambda place: place['droplet_reachable_activity'] == 1, samples['place']))
             droplet_reachable_count = 0
 
         elif use_condition == 1:
             # 2の条件のみを満たす
-            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 0, samples['place']))
+            filter_samples = list(filter(
+                lambda place: place['droplet_reachable_activity'] == 0, samples['place']))
             droplet_reachable_count = 1
 
         else:
             # 両方の条件を満たす
-            filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 1, samples['place']))
+            filter_samples = list(filter(
+                lambda place: place['droplet_reachable_activity'] == 1, samples['place']))
             droplet_reachable_count = 1
 
     else:
         # LowLevelCloseContactのとき
-        filter_samples = list(filter(lambda place: place['droplet_reachable_activity'] == 0, samples['place']))
+        filter_samples = list(filter(
+            lambda place: place['droplet_reachable_activity'] == 0, samples['place']))
         droplet_reachable_count = 0
 
-    
-    not_droplet_reachable_count = random.randint(0, 3 - droplet_reachable_count)
+    not_droplet_reachable_count = random.randint(
+        0, 3 - droplet_reachable_count)
     location = random.choice(filter_samples)
-    droplet_reachable_actions = random.sample(samples['reachable_activity'], droplet_reachable_count)
-    not_droplet_reachable_actions = random.sample(samples['not_reachable_activity'], not_droplet_reachable_count)
+    droplet_reachable_actions = random.sample(
+        samples['reachable_activity'], droplet_reachable_count)
+    not_droplet_reachable_actions = random.sample(
+        samples['not_reachable_activity'], not_droplet_reachable_count)
     actions = droplet_reachable_actions + not_droplet_reachable_actions
     return location, actions
 
@@ -64,14 +74,17 @@ def select_select_activity_situation(levels, risk_activity_situation_samples):
     else:
         risk_activity_situation_count = 0
 
-    risk_activity_situations = random.sample(risk_activity_situation_samples, risk_activity_situation_count)
+    risk_activity_situations = random.sample(
+        risk_activity_situation_samples, risk_activity_situation_count)
     return risk_activity_situation_count, risk_activity_situations
 
+
 def random_duration(levels):
-    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MediumLevelCloseContact" :
+    if levels['close_contact'] == "HighLevelCloseContact" or levels['close_contact'] == "MediumLevelCloseContact":
         return random.randint(16, 30)
     else:
         return random.randint(0, 15)
+
 
 def select_space_situation(levels, risk_spaces_situation_samples):
     if levels['crowding'] == "HighLevelCrowding":
@@ -86,12 +99,14 @@ def select_space_situation(levels, risk_spaces_situation_samples):
         risk_spaces_situations = random.choice(risk_spaces_situation_samples)
         return [risk_spaces_situations]
 
+
 def select_situation_type(levels, situation_samples):
     situation = None
     if levels['closed_space'] == "HighLevelClosedSpace" or levels['closed_space'] == "MediumLevelClosedSpace":
         situation = random.choice(situation_samples)
     return situation
-        
+
+
 def generate_testdata(data_count=100, case_number=1):
     # read CSV
     with open('sample.csv', encoding='utf-8') as f:
@@ -133,7 +148,7 @@ def generate_testdata(data_count=100, case_number=1):
                 ?o2 a ?o3
             } limit 1000""" % (prefix, place[0].iri)))
         p = {'name': place[0].name, 'iri': place[0].iri,
-            'droplet_reachable_activity': 0}
+             'droplet_reachable_activity': 0}
         for afford in affords:
             if(hasattr(afford[1], 'iri') and afford[1].iri == 'http://plod.info/rdf/DropletReachableActivity'):
                 p['droplet_reachable_activity'] += 1
@@ -158,13 +173,12 @@ def generate_testdata(data_count=100, case_number=1):
             } limit 1000""" % (prefix, activity_type[0].iri)))
         for activity in activities:
             sample = {'name': activity[0].name, 'iri': activity[0].iri,
-                    'is_droplet_reachable_activity': activity_type[0].iri == 'http://plod.info/rdf/DropletReachableActivity'}
+                      'is_droplet_reachable_activity': activity_type[0].iri == 'http://plod.info/rdf/DropletReachableActivity'}
             samples['activity'].append(sample)
             if sample["is_droplet_reachable_activity"]:
                 samples['reachable_activity'].append(sample)
             else:
                 samples['not_reachable_activity'].append(sample)
-
 
     risk_activity_situations = list(my_world.sparql("""
         %s
@@ -176,7 +190,6 @@ def generate_testdata(data_count=100, case_number=1):
     for risk_activity_situation in risk_activity_situations:
         samples['risk_activity_situation'].append(
             {'name': risk_activity_situation[0].name, 'iri': risk_activity_situation[0].iri})
-
 
     risk_space_situations = list(my_world.sparql("""
         %s
@@ -223,7 +236,8 @@ def generate_testdata(data_count=100, case_number=1):
     for place_sample in samples['place']:
         place_sample_uri = URIRef(
             "http://plod.info/rdf/%s" % place_sample['name'])
-        store.add((place_sample_uri, RDFS.label, Literal(place_sample['name'])))
+        store.add((place_sample_uri, RDFS.label,
+                   Literal(place_sample['name'])))
         store.add((place_sample_uri, RDF.type, URIRef(place_sample['iri'])))
 
     high_level_close_contact_count = 0
@@ -260,8 +274,10 @@ def generate_testdata(data_count=100, case_number=1):
 
         location, actions = select_location_and_actions(levels, samples)
 
-        location_uri = URIRef("http://plod.info/rdf/%s_%s" % (location['name'], i))
-        location_uri_noindex = URIRef("http://plod.info/rdf/%s" % location['name'])
+        location_uri = URIRef("http://plod.info/rdf/%s_%s" %
+                              (location['name'], i))
+        location_uri_noindex = URIRef(
+            "http://plod.info/rdf/%s" % location['name'])
         store.add((event_uri, schema.location, location_uri))
         store.add((location_uri, RDF.type, location_uri_noindex))
 
@@ -288,7 +304,7 @@ def generate_testdata(data_count=100, case_number=1):
         store.add((time_temporal_duration_uri, RDF.type, time.TemporalDuration))
         store.add((time_uri, time.hasDuration, time_temporal_duration_uri))
         store.add((time_temporal_duration_uri, time.numericDuration,
-                Literal(duration, datatype=XSD.decimal)))
+                   Literal(duration, datatype=XSD.decimal)))
 
         situation = select_situation_type(levels, samples['situation_type'])
         if situation != None:
@@ -306,7 +322,8 @@ def generate_testdata(data_count=100, case_number=1):
             store.add((situation_uri, plod.situationOfActivity, URIRef(
                 "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
 
-        risk_spaces = select_space_situation(levels, samples['risk_space_situation'])
+        risk_spaces = select_space_situation(
+            levels, samples['risk_space_situation'])
         risk_spaces_count = 0
         if risk_spaces != None:
             for risk_space in risk_spaces:
@@ -332,23 +349,25 @@ def generate_testdata(data_count=100, case_number=1):
         if situation_types != None and risk_spaces_count == 0:
             medium_level_closed_space_count += 1
 
-
     print("generate %s test data." % data_count)
 
     print("plod:HighLevelCloseContact count by generate_testdata.py: %s" %
-        high_level_close_contact_count)
+          high_level_close_contact_count)
     print("plod:HighLevelClosedSpace count by generate_testdata.py: %s" %
-        high_level_closed_space_count)
+          high_level_closed_space_count)
     print("plod:HighLevelCrowding count by generate_testdata.py: %s" %
-        high_level_crowding_count)
+          high_level_crowding_count)
     print("plod:MediumLevelCrowding count by generate_testdata.py: %s" %
-        medium_level_crowding_count)
+          medium_level_crowding_count)
     print("plod:MediumLevelClosedSpace count by generate_testdata.py: %s" %
-        medium_level_closed_space_count)
+          medium_level_closed_space_count)
     print("plod:MediumLevelCrowding count by generate_testdata.py: %s" %
-        medium_level_crowding_count)
+          medium_level_crowding_count)
 
     store.serialize("test.rdf", format="pretty-xml", max_depth=3)
+
+    return [high_level_close_contact_count, high_level_closed_space_count, high_level_crowding_count, medium_level_crowding_count, medium_level_closed_space_count, medium_level_crowding_count]
+
 
 def reasoning():
     start_time = time.time()
@@ -362,7 +381,8 @@ def reasoning():
     my_world.save()
 
     types = ['HighLevelCloseContact', 'HighLevelClosedSpace', 'HighLevelCrowding',
-            'MediumLevelCloseContact', 'MediumLevelClosedSpace', 'MediumLevelCrowding']
+             'MediumLevelCloseContact', 'MediumLevelClosedSpace', 'MediumLevelCrowding']
+    counts = []
 
     for t in types:
         results = list(my_world.sparql("""
@@ -375,6 +395,9 @@ def reasoning():
             ids.append(result[0].iri)
         # ids.sort()
         # print(ids)
+        counts.append(len(ids))
         print("plod:%s count by reasoning.py: %s" % (t, len(ids)))
 
+    counts.append(time.time() - start_time)
     print("--- %s seconds ---" % (time.time() - start_time))
+    return counts

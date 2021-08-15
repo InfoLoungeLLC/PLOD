@@ -80,6 +80,7 @@ SARS-CoV-2_Infection_Risk_Ontology_cardinality.owlをパースして
 import sys
 import functions as fc
 import subprocess
+import csv
 
 '''
 不可能な組み合わせ(csv順)
@@ -96,7 +97,26 @@ l-m-m
 args = sys.argv
 case_number = int(args[1]) if 1 < len(args) else 1
 data_count = int(args[2]) if 2 < len(args) else 100
-fc.generate_testdata(data_count, case_number)
-subprocess.Popen("""./monitor_memory.sh %s %s""" %
-                 (case_number, data_count), shell=True)
-fc.reasoning()
+
+with open('./results.csv', 'w') as f:
+    writer = csv.writer(f)
+    writer.writerow(['テストケース番号', 'テストデータ数',
+                     'Generated HighLevelCloseContact',
+                     'Generated HighLevelClosedSpace',
+                     'Generated HighLevelCrowding',
+                     'Generated MediumLevelCloseContact',
+                     'Generated MediumLevelClosedSpace',
+                     'Generated MediumLevelCrowding',
+                     'Reasoned HighLevelCloseContact',
+                     'Reasoned HighLevelClosedSpace',
+                     'Reasoned HighLevelCrowding',
+                     'Reasoned MediumLevelCloseContact',
+                     'Reasoned MediumLevelClosedSpace',
+                     'Reasoned MediumLevelCrowding',
+                     '処理時間[秒]'])
+
+    result1 = fc.generate_testdata(data_count, case_number)
+    subprocess.Popen("""./monitor_memory.sh %s %s""" %
+                     (case_number, data_count), shell=True)
+    result2 = fc.reasoning()
+    writer.writerow([case_number, data_count] + result1 + result2)
