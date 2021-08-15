@@ -120,7 +120,8 @@ def generate_testdata(case_number=1, data_count=100):
     third_count = data_count - first_count - second_count
 
     my_world = World()
-    my_world.set_backend(filename="""sqlite/test_%s_datacount_%s.sqlite""" % (case_number, data_count))
+    my_world.set_backend(
+        filename="""sqlite/test_%s_datacount_%s.sqlite""" % (case_number, data_count))
     onto = my_world.get_ontology(
         "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
     my_world.save()
@@ -307,6 +308,7 @@ def generate_testdata(case_number=1, data_count=100):
                    Literal(duration, datatype=XSD.decimal)))
 
         situation = select_situation_type(levels, samples['situation_type'])
+        situation_uri = None
         if situation != None:
             situation_uri = URIRef("http://plod.info/rdf/id/situation_%s" % i)
             store.add((situation_uri, RDF.type, plod.Situation))
@@ -319,13 +321,14 @@ def generate_testdata(case_number=1, data_count=100):
         for risk_activity_situation in risk_activity_situations:
             store.add((event_uri, plod.situationOfActivity, URIRef(
                 "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
-            store.add((situation_uri, plod.situationOfActivity, URIRef(
-                "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
+            if situation_uri != None:
+                store.add((situation_uri, plod.situationOfActivity, URIRef(
+                    "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
 
         risk_spaces = select_space_situation(
             levels, samples['risk_space_situation'])
         risk_spaces_count = 0
-        if risk_spaces != None:
+        if risk_spaces != None and situation_uri != None:
             for risk_space in risk_spaces:
                 risk_spaces_count += 1
                 store.add((situation_uri, plod.situationOfSpace, URIRef(
@@ -364,18 +367,22 @@ def generate_testdata(case_number=1, data_count=100):
     print("plod:MediumLevelCrowding count by generate_testdata.py: %s" %
           medium_level_crowding_count)
 
-    store.serialize("""rdf/case_%s_datacount_%s.rdf""" % (case_number, data_count), format="pretty-xml", max_depth=3)
+    store.serialize("""rdf/case_%s_datacount_%s.rdf""" %
+                    (case_number, data_count), format="pretty-xml", max_depth=3)
 
     return [high_level_close_contact_count, high_level_closed_space_count, high_level_crowding_count, medium_level_crowding_count, medium_level_closed_space_count, medium_level_crowding_count]
+
 
 def reasoning(case_number=1, data_count=100):
     start_time = time.time()
 
-    my_world = World(filename="""sqlite/case_%s_datacount_%s.sqlite""" % (case_number, data_count))
+    my_world = World(
+        filename="""sqlite/case_%s_datacount_%s.sqlite""" % (case_number, data_count))
     my_world = World()
     onto = my_world.get_ontology(
         "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
-    data = my_world.get_ontology("""rdf/case_%s_datacount_%s.rdf""" % (case_number, data_count)).load()
+    data = my_world.get_ontology(
+        """rdf/case_%s_datacount_%s.rdf""" % (case_number, data_count)).load()
     sync_reasoner([onto, data])
     my_world.save()
 
