@@ -94,9 +94,16 @@ l-m-h
 l-m-m
 '''
 
-args = sys.argv
-case_number = int(args[1]) if 1 < len(args) else 1
-data_count = int(args[2]) if 2 < len(args) else 100
+# args = sys.argv
+# case_number = int(args[1]) if 1 < len(args) else 1
+# data_count = int(args[2]) if 2 < len(args) else 100
+
+file = open("sample.csv")
+reader = csv.reader(file)
+rows = len(list(reader))
+
+# data_counts_pattern = [100, 200, 500]
+data_counts_pattern = [100, 200]
 
 with open('./results.csv', 'w') as f:
     writer = csv.writer(f)
@@ -114,9 +121,13 @@ with open('./results.csv', 'w') as f:
                      'Reasoned MediumLevelClosedSpace',
                      'Reasoned MediumLevelCrowding',
                      '処理時間[秒]'])
-
-    result1 = fc.generate_testdata(data_count, case_number)
-    subprocess.Popen("""./monitor_memory.sh %s %s""" %
-                     (case_number, data_count), shell=True)
-    result2 = fc.reasoning()
-    writer.writerow([case_number, data_count] + result1 + result2)
+    case_number = 1
+    # while case_number < 3:
+    while case_number < rows:
+        for data_count in data_counts_pattern:
+            result1 = fc.generate_testdata(case_number, data_count)
+            subprocess.Popen("""./monitor_memory.sh %s %s""" %
+                            (case_number, data_count), shell=True)
+            result2 = fc.reasoning(case_number, data_count)
+            writer.writerow([case_number, data_count] + result1 + result2)
+            case_number += 1
