@@ -216,15 +216,6 @@ for situation_type in situation_types:
     samples['situation_type'].append({
         'name': situation_type[0].name, 'iri': situation_type[0].iri})
 
-    # situations = list(my_world.sparql("""
-    #     %s
-    #     SELECT DISTINCT * WHERE {
-    #         ?s a <%s>
-    #     } limit 1000""" % (prefix, situation_type[0].iri)))
-    # for situation in situations:
-    #     situation_samples.append({'name': situation[0].name, 'iri': situation[0].iri,
-    #                                  'isSituationOf': situation_type[0].iri == 'http://plod.info/rdf/isSituationOf'})
-
 store = Graph()
 schema = Namespace("https://schema.org/")
 time = Namespace("http://www.w3.org/2006/time#")
@@ -285,15 +276,12 @@ for i in range(data_count):
     store.add((event_uri, RDF.type, schema.Event))
     store.add((event_uri, RDFS.label, Literal("event_%s" % i)))
 
-    location, actions = sl.location_and_action(
-        levels, samples['place'], samples['reachable_activity'], samples['not_reachable_activity'])
+    location, actions = sl.select_samples(levels, samples)
 
     location_uri = URIRef("http://plod.info/rdf/%s_%s" % (location['name'], i))
     location_uri_noindex = URIRef("http://plod.info/rdf/%s" % location['name'])
     store.add((event_uri, schema.location, location_uri))
-    store.add((location_uri, RDF.type, location_uri))
     store.add((location_uri, RDF.type, location_uri_noindex))
-
 
     droplet_reachable_activity_count = 0
     for action in actions:
@@ -306,7 +294,6 @@ for i in range(data_count):
     # persons = random.sample(samples['person'], person_count)
     # for person in persons:
     #     store.add((event_uri, plod.agent, person))
-
 
     time_uri = URIRef("http://plod.info/rdf/id/time_%s" % i)
     store.add((time_uri, RDF.type, time.Interval))
@@ -321,10 +308,12 @@ for i in range(data_count):
     store.add((time_temporal_duration_uri, time.numericDuration,
                Literal(duration, datatype=XSD.decimal)))
 
-
-    situation_uri = URIRef("http://plod.info/rdf/id/situation_%s" % i)
-    store.add((situation_uri, RDF.type, plod.Situation))
-    store.add((situation_uri, plod.isSituationOf, location_uri))
+    situation = sl.situation_type(levels, samples['situation_type'])
+    if situation != None:
+        situation_uri = URIRef("http://plod.info/rdf/id/situation_%s" % i)
+        store.add((situation_uri, RDF.type, plod.Situation))
+        store.add((situation_uri, plod.isSituationOf, URIRef(
+            "http://plod.info/rdf/%s" % situation['name'])))
 
     risk_activity_situation_count, risk_activity_situations = sl.activity_situation(
         levels, samples['risk_activity_situation'])
@@ -335,7 +324,6 @@ for i in range(data_count):
         store.add((situation_uri, plod.situationOfActivity, URIRef(
             "http://plod.info/rdf/%s" % risk_activity_situation['name'])))
 
-
     risk_spaces = sl.space_situation(levels, samples['risk_space_situation'])
     risk_spaces_count = 0
     if risk_spaces != None:
@@ -344,14 +332,9 @@ for i in range(data_count):
             store.add((situation_uri, plod.situationOfSpace, URIRef(
                 "http://plod.info/rdf/%s" % risk_space['name'])))
 
-
-    # high_events.append({'uri': uri, 'iri': place[0].iri, 'location_has_one_more_than_droplet_reachable_activity': location['droplet_reachable_activity'] > 1,
-    #                     'event_has_one_more_than_droplet_reachable_activity': droplet_reachable_activity_count > 1, 'event_has_one_risk_activity_situation': risk_activity_situation_count > 0, 'longer_than_15': duration > 15})
-
-  
     if (location['droplet_reachable_activity'] > 1 or droplet_reachable_activity_count > 1) and risk_activity_situation_count > 0 and duration > 15:
         high_level_close_contact_count += 1
-    
+
     if ((location['droplet_reachable_activity'] == 1 and droplet_reachable_activity_count <= 1) or (droplet_reachable_activity_count == 1 and location['droplet_reachable_activity'] <= 1)) and risk_activity_situation_count > 0 and duration > 15:
         medium_level_close_contact_count += 1
 
@@ -366,16 +349,22 @@ for i in range(data_count):
 
     if situation_types != None and risk_spaces_count == 0:
         medium_level_closed_space_count += 1
-    
+
 
 print("generate %s test data." % data_count)
 
-print("plod:HighLevelCloseContact count by generate_testdata.py: %s" % high_level_close_contact_count)
-print("plod:MediumLevelCloseContact count by generate_testdata.py: %s" % medium_level_close_contact_count)
-print("plod:HighLevelCrowding count by generate_testdata.py: %s" % high_level_crowding_count)
-print("plod:MediumLevelCrowding count by generate_testdata.py: %s" % medium_level_crowding_count)
-print("plod:HighLevelClosedSpace count by generate_testdata.py: %s" % high_level_closed_space_count)
-print("plod:MediumLevelClosedSpace count by generate_testdata.py: %s" % medium_level_closed_space_count)
+print("plod:HighLevelCloseContact count by generate_testdata.py: %s" %
+      high_level_close_contact_count)
+print("plod:MediumLevelCloseContact count by generate_testdata.py: %s" %
+      medium_level_close_contact_count)
+print("plod:HighLevelCrowding count by generate_testdata.py: %s" %
+      high_level_crowding_count)
+print("plod:MediumLevelCrowding count by generate_testdata.py: %s" %
+      medium_level_crowding_count)
+print("plod:HighLevelClosedSpace count by generate_testdata.py: %s" %
+      high_level_closed_space_count)
+print("plod:MediumLevelClosedSpace count by generate_testdata.py: %s" %
+      medium_level_closed_space_count)
 
 
 store.serialize("test.rdf", format="pretty-xml", max_depth=3)
