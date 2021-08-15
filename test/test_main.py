@@ -94,8 +94,8 @@ l-m-m
 '''
 
 args = sys.argv
-data_count = int(args[1]) if args[1:1] else 100
-case_number = int(args[2]) if args[1:2] else 1
+data_count = int(args[1]) if 1 < len(args) else 100
+case_number = int(args[2]) if 2 < len(args) else 1
 fc.generate_testdata(data_count, case_number)
 subprocess.Popen('./monitor_memory.sh')
 fc.reasoning()
