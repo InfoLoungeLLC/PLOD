@@ -98,7 +98,7 @@ l-m-m
 # case_number = int(args[1]) if 1 < len(args) else 1
 # data_count = int(args[2]) if 2 < len(args) else 100
 
-file = open("sample.csv")
+file = open("test_cases.csv")
 reader = csv.reader(file)
 case_counts = len(list(reader)) - 1
 
