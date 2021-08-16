@@ -109,7 +109,7 @@ def select_situation_type(levels, situation_samples):
 
 def generate_testdata(case_number=1, data_count=100):
     # read CSV
-    with open('sample.csv', encoding='utf-8') as f:
+    with open('test_cases.csv', encoding='utf-8') as f:
         reader = csv.reader(f)
         case_sample = [row for row in reader]
 
@@ -380,7 +380,7 @@ def reasoning(case_number=1, data_count=100):
         filename="""sqlite/case_%s_datacount_%s.sqlite""" % (case_number, data_count))
     my_world = World()
     onto = my_world.get_ontology(
-        "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
+        "./SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
     data = my_world.get_ontology(
         """rdf/case_%s_datacount_%s.rdf""" % (case_number, data_count)).load()
     sync_reasoner([onto, data])
