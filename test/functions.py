@@ -360,8 +360,8 @@ def generate_testdata(case_number=1, data_count=100):
           high_level_closed_space_count)
     print("plod:HighLevelCrowding count by generate_testdata.py: %s" %
           high_level_crowding_count)
-    print("plod:MediumLevelCrowding count by generate_testdata.py: %s" %
-          medium_level_crowding_count)
+    print("plod:MediumLevelCloseContact count by generate_testdata.py: %s" %
+          medium_level_close_contact_count)
     print("plod:MediumLevelClosedSpace count by generate_testdata.py: %s" %
           medium_level_closed_space_count)
     print("plod:MediumLevelCrowding count by generate_testdata.py: %s" %
@@ -370,7 +370,7 @@ def generate_testdata(case_number=1, data_count=100):
     store.serialize("""rdf/case_%s_datacount_%s.rdf""" %
                     (case_number, data_count), format="pretty-xml", max_depth=3)
 
-    return [high_level_close_contact_count, high_level_closed_space_count, high_level_crowding_count, medium_level_crowding_count, medium_level_closed_space_count, medium_level_crowding_count]
+    return [high_level_close_contact_count, high_level_closed_space_count, high_level_crowding_count, medium_level_close_contact_count, medium_level_closed_space_count, medium_level_crowding_count]
 
 
 def reasoning(case_number=1, data_count=100):
