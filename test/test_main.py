@@ -100,7 +100,7 @@ l-m-m
 
 file = open("sample.csv")
 reader = csv.reader(file)
-rows = len(list(reader))
+case_counts = len(list(reader)) - 1
 
 # data_counts_pattern = [100, 200, 500]
 data_counts_pattern = [100, 200]
@@ -123,7 +123,7 @@ with open('./results.csv', 'w') as f:
                      '処理時間[秒]'])
     case_number = 1
     # while case_number < 3:
-    while case_number < rows:
+    while case_number < case_counts:
         for data_count in data_counts_pattern:
             result1 = fc.generate_testdata(case_number, data_count)
             subprocess.Popen("""./monitor_memory.sh %s %s""" %
