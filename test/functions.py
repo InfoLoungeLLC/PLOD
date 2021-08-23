@@ -107,13 +107,16 @@ def select_situation_type(levels, situation_samples):
     return situation
 
 
-def generate_testdata(case_number=1, data_count=100):
+def generate_testdata(case_number=1, data_count=100, no_duration=False):
     # read CSV
     with open('test_cases.csv', encoding='utf-8') as f:
         reader = csv.reader(f)
         case_sample = [row for row in reader]
 
     case = case_sample[case_number]
+
+    ontology = "./SARS-CoV-2_Infection_Risk_Ontology_cardinality_noDuration_ExactlyToMin.owl" if (
+        no_duration is True) else "./SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl"
 
     first_count = int(data_count * int(case[4]) / 100)
     second_count = int(data_count * int(case[8]) / 100)
@@ -122,8 +125,7 @@ def generate_testdata(case_number=1, data_count=100):
     my_world = World()
     my_world.set_backend(
         filename="""sqlite/test_%s_datacount_%s.sqlite""" % (case_number, data_count))
-    onto = my_world.get_ontology(
-        "../rdf/SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
+    onto = my_world.get_ontology(ontology).load()
     my_world.save()
 
     prefix = """
@@ -373,14 +375,17 @@ def generate_testdata(case_number=1, data_count=100):
     return [high_level_close_contact_count, high_level_closed_space_count, high_level_crowding_count, medium_level_close_contact_count, medium_level_closed_space_count, medium_level_crowding_count]
 
 
-def reasoning(case_number=1, data_count=100):
+def reasoning(case_number=1, data_count=100, no_duration=False):
     start_time = time.time()
 
     my_world = World(
         filename="""sqlite/case_%s_datacount_%s.sqlite""" % (case_number, data_count))
     my_world = World()
-    onto = my_world.get_ontology(
-        "./SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl").load()
+
+    ontology = "./SARS-CoV-2_Infection_Risk_Ontology_cardinality_noDuration_ExactlyToMin.owl" if (
+        no_duration is True) else "./SARS-CoV-2_Infection_Risk_Ontology_cardinality_ExactlyToMin.owl"
+
+    onto = my_world.get_ontology(ontology).load()
     data = my_world.get_ontology(
         """rdf/case_%s_datacount_%s.rdf""" % (case_number, data_count)).load()
     sync_reasoner([onto, data])

@@ -77,7 +77,7 @@ SARS-CoV-2_Infection_Risk_Ontology_cardinality.owlをパースして
 1. plot:isSituationOfが存在し、plot:IndoorFacilityである
 2. plot:isSituationOfが存在し、plot:Public_transportationである
 '''
-import sys
+import argparse
 import functions as fc
 import subprocess
 import csv
@@ -94,9 +94,9 @@ l-m-h
 l-m-m
 '''
 
-# args = sys.argv
-# case_number = int(args[1]) if 1 < len(args) else 1
-# data_count = int(args[2]) if 2 < len(args) else 100
+parser = argparse.ArgumentParser()
+parser.add_argument("--noDuration", help="optional", action="store_true")
+args = parser.parse_args()
 
 file = open("test_cases.csv")
 reader = csv.reader(file)
@@ -125,9 +125,9 @@ with open('./results.csv', 'w') as f:
     # while case_number < 3:
     while case_number < case_counts:
         for data_count in data_counts_pattern:
-            result1 = fc.generate_testdata(case_number, data_count)
+            result1 = fc.generate_testdata(case_number, data_count, args.noDuration)
             subprocess.Popen("""./monitor_memory.sh %s %s""" %
                             (case_number, data_count), shell=True)
-            result2 = fc.reasoning(case_number, data_count)
+            result2 = fc.reasoning(case_number, data_count, args.noDuration)
             writer.writerow([case_number, data_count] + result1 + result2)
             case_number += 1
