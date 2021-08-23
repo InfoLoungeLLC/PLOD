@@ -1507,7 +1507,7 @@
 
     <!-- http://plod.info/rdf/event20200401-1 -->
 
-    <owl:NamedIndividual rdf:about="http://plod.info/rdf/event20200401-1">
+    <!-- <owl:NamedIndividual rdf:about="http://plod.info/rdf/event20200401-1">
         <rdf:type rdf:resource="http://schema.org/Event"/>
         <plod:action rdf:resource="http://plod.info/rdf/eat"/>
         <plod:action rdf:resource="http://plod.info/rdf/removeMask"/>
@@ -1520,7 +1520,7 @@
         <time:hasDuration rdf:resource="http://plod.info/rdf/longTimeAction"/>
         <rdfs:comment>ある時間帯におけるレストランAでの食事イベント1</rdfs:comment>
         <rdfs:label xml:lang="ja">ある時間帯におけるレストランAでの食事イベント1</rdfs:label>
-    </owl:NamedIndividual>
+    </owl:NamedIndividual> -->
     
 
 
@@ -1649,12 +1649,12 @@
 
     <!-- http://plod.info/rdf/situation20200401-1 -->
 
-    <owl:NamedIndividual rdf:about="http://plod.info/rdf/situation20200401-1">
+    <!-- <owl:NamedIndividual rdf:about="http://plod.info/rdf/situation20200401-1">
         <rdf:type rdf:resource="http://plod.info/rdf/Situation"/>
         <plod:isSituationOf rdf:resource="http://plod.info/rdf/restaurant-A"/>
         <plod:situationOfSpace rdf:resource="http://plod.info/rdf/crowded"/>
         <rdfs:label xml:lang="ja">ある時間帯におけるレストランAの状態1</rdfs:label>
-    </owl:NamedIndividual>
+    </owl:NamedIndividual> -->
     
 
 
