@@ -12,8 +12,7 @@ file = open("test_cases.csv")
 reader = csv.reader(file)
 case_counts = len(list(reader)) - 1
 
-# data_counts_pattern = [100, 200, 500]
-data_counts_pattern = [100, 200]
+data_counts_pattern = [100, 500, 1000]
 
 with open('./results.csv', 'w') as f:
     writer = csv.writer(f)
@@ -32,7 +31,6 @@ with open('./results.csv', 'w') as f:
                      'Reasoned MediumLevelCrowding',
                      '処理時間[秒]'])
     case_number = 1
-    # while case_number < 3:
     while case_number < case_counts:
         for data_count in data_counts_pattern:
             result1 = fc.generate_testdata(case_number, data_count, args.noDuration)
