@@ -12,8 +12,8 @@ while true
 do
     DATE=`date +"%H:%M:%S:%s%:z"`
     echo -n "$DATE," | tee -a $csv
-    var="$(top -b -n 1| grep -w java | tr -s ' ' | cut -d ' ' -f 11)"
-    monitor=`top -b -n 1| grep -w java | tr -s ' ' | cut -d ' ' -f 11`
+    var="$(top -b -n 1| grep java | grep infolou | tr -s ' ' | cut -d ' ' -f 11)"
+    monitor=`top -b -n 1| grep java | grep infolou | tr -s ' ' | cut -d ' ' -f 11`
     echo $monitor
     if [[ `echo "$monitor > 0" | bc` == 1 ]]; then
         echo -n "$var," | tee -a $csv
